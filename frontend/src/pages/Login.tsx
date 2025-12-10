@@ -30,9 +30,9 @@ export default function Login() {
         <Card variant="glass" className="relative w-full max-w-md animate-fade-in">
           <CardHeader className="text-center pb-2">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Zap className="h-8 w-8 text-primary" />
+              <img src="/logo.svg" alt="HackConnect Logo" className="h-8 w-8 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
               <span className="text-2xl font-bold">
-                Hack<span className="text-primary">Hub</span>
+                Hack<span className="text-primary">Connect</span>
               </span>
             </div>
             <CardTitle className="text-2xl">Welcome back</CardTitle>
