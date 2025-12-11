@@ -150,29 +150,25 @@ export default function Chat() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Sidebar />
-
-      <main className="lg:pl-64 pt-16 h-screen">
-        <div className="flex h-[calc(100vh-4rem)]">
-          {/* Channel List - Responsive */}
-          <div
-            className={cn(
-              "border-r border-border/50 flex flex-col transition-all duration-300 bg-background",
-              showChannels ? "w-72 md:w-72" : "w-0 overflow-hidden",
-              "absolute lg:relative z-20 h-[calc(100vh-4rem)] lg:h-auto"
-            )}
-          >
-            <div className="p-4 border-b border-border/50">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search messages..."
-                  className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
+    <div className="h-[calc(100vh-4rem)]">
+      <div className="flex h-full">
+        {/* Channel List - Responsive */}
+        <div
+          className={cn(
+            "border-r border-border/50 flex flex-col transition-all duration-300 bg-background",
+            showChannels ? "w-72 md:w-72" : "w-0 overflow-hidden",
+            "absolute lg:relative z-20 h-full lg:h-auto"
+          )}
+        >
+          <div className="p-4 border-b border-border/50">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search messages..."
+                className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+              />
             </div>
+          </div>
 
             <ScrollArea className="flex-1">
               <div className="p-2 space-y-1">
@@ -409,8 +405,7 @@ export default function Chat() {
               </div>
             </div>
           </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

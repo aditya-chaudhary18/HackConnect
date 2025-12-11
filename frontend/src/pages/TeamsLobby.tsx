@@ -112,31 +112,26 @@ export default function TeamsLobby() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Sidebar />
-
-      <main className="pl-64 pt-16">
-        <div className="p-8">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Team Finder</h1>
-              <p className="text-muted-foreground">
-                Find your dream team or create your own
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button variant="outline" className="gap-2">
-                <Shuffle className="h-4 w-4" />
-                Quick Match
-              </Button>
-              <Button variant="neon" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Create Team
-              </Button>
-            </div>
-          </div>
+    <div className="p-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Team Finder</h1>
+          <p className="text-muted-foreground">
+            Find your dream team or create your own
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="outline" className="gap-2">
+            <Shuffle className="h-4 w-4" />
+            Quick Match
+          </Button>
+          <Button variant="neon" className="gap-2">
+            <Plus className="h-4 w-4" />
+            Create Team
+          </Button>
+        </div>
+      </div>
 
           {/* Smart Matching Banner */}
           <Card variant="neon" className="mb-8 overflow-hidden">
@@ -247,7 +242,5 @@ export default function TeamsLobby() {
             </Card>
           )}
         </div>
-      </main>
-    </div>
   );
 }

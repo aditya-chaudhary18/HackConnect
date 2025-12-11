@@ -9,6 +9,7 @@ import type { Hackathon } from "@/types/hackathon";
 interface HackathonCardProps {
   hackathon: Partial<Hackathon>;
   variant?: "default" | "featured" | "compact";
+  onClick?: () => void;
 }
 
 export function HackathonCardSkeleton() {
@@ -41,7 +42,7 @@ export function HackathonCardSkeleton() {
   );
 }
 
-export function HackathonCard({ hackathon, variant = "default" }: HackathonCardProps) {
+export function HackathonCard({ hackathon, variant = "default", onClick }: HackathonCardProps) {
   const {
     title,
     shortDescription,
@@ -191,7 +192,11 @@ export function HackathonCard({ hackathon, variant = "default" }: HackathonCardP
       </CardContent>
 
       <CardFooter>
-        <Button className="w-full" variant={variant === "featured" ? "neon" : "default"}>
+        <Button 
+          className="w-full" 
+          variant={variant === "featured" ? "neon" : "default"}
+          onClick={onClick}
+        >
           View Details
         </Button>
       </CardFooter>

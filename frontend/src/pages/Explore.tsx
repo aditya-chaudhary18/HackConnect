@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +19,8 @@ import {
   Globe,
   Laptop,
   Building,
+  X,
+  ArrowRight,
 } from "lucide-react";
 
 const hackathons = [
@@ -134,6 +138,9 @@ export default function Explore() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const selectedHackathon = hackathons.find((h) => h.id === selectedId);
 
   const filteredHackathons = hackathons.filter((h) => {
     const matchesSearch = h.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -145,19 +152,14 @@ export default function Explore() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Sidebar />
-
-      <main className="pl-64 pt-16">
-        <div className="p-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Explore Hackathons</h1>
-            <p className="text-muted-foreground">
-              Discover {hackathons.length}+ hackathons from around the world
-            </p>
-          </div>
+    <div className="p-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Explore Hackathons</h1>
+        <p className="text-muted-foreground">
+          Discover {hackathons.length}+ hackathons from around the world
+        </p>
+      </div>
 
           {/* Search & Filters */}
           <div className="space-y-4 mb-8">
@@ -255,18 +257,112 @@ export default function Explore() {
             }
           >
             {filteredHackathons.map((hackathon, index) => (
-              <div
+              <motion.div
                 key={hackathon.id}
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 0.05}s` }}
+                layoutId={hackathon.id}
+                className="h-full"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
               >
                 <HackathonCard
                   hackathon={hackathon}
                   variant={viewMode === "list" ? "compact" : "default"}
+                  onClick={() => setSelectedId(hackathon.id)}
                 />
-              </div>
+              </motion.div>
             ))}
           </div>
+
+          <AnimatePresence>
+            {selectedId && selectedHackathon && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+                  onClick={() => setSelectedId(null)}
+                />
+                <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none p-4">
+                  <motion.div
+                    layoutId={selectedId}
+                    className="w-full max-w-lg bg-card border border-border rounded-xl shadow-2xl overflow-hidden pointer-events-auto"
+                  >
+                    <div className="relative h-64">
+                      <div
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${selectedHackathon.coverImage})` }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-4 right-4 bg-background/50 hover:bg-background/80 backdrop-blur-sm rounded-full"
+                        onClick={() => setSelectedId(null)}
+                      >
+                        <X className="h-5 w-5" />
+                      </Button>
+                      <div className="absolute bottom-6 left-6 right-6">
+                        <h2 className="text-3xl font-bold text-white mb-2">{selectedHackathon.title}</h2>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedHackathon.tags.map((tag) => (
+                            <Badge key={tag} variant="secondary" className="bg-background/20 text-white hover:bg-background/30 border-none">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-6 space-y-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="space-y-1">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Prize Pool</p>
+                          <p className="font-semibold text-lg text-primary">
+                            {new Intl.NumberFormat("en-US", { style: "currency", currency: selectedHackathon.currency }).format(selectedHackathon.totalPrizePool)}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Participants</p>
+                          <p className="font-semibold text-lg">{selectedHackathon.participantCount}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Date</p>
+                          <p className="font-semibold text-lg">
+                            {selectedHackathon.startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Location</p>
+                          <p className="font-semibold text-lg capitalize">{selectedHackathon.location.type}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h3 className="font-semibold text-lg">About the Event</h3>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {selectedHackathon.shortDescription}. Join us for an incredible weekend of building, learning, and networking with the best minds in the industry.
+                        </p>
+                      </div>
+
+                      <div className="flex gap-4 pt-4 border-t border-border">
+                        <Link to={`/register/${selectedHackathon.id}`} className="flex-1">
+                          <Button size="lg" className="w-full font-semibold text-lg h-12" variant="neon">
+                            Register Now
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                          </Button>
+                        </Link>
+                        <Button size="lg" variant="outline" className="h-12" onClick={() => setSelectedId(null)}>
+                          Maybe Later
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </>
+            )}
+          </AnimatePresence>
 
           {/* Empty State */}
           {filteredHackathons.length === 0 && (
@@ -291,7 +387,5 @@ export default function Explore() {
             </Card>
           )}
         </div>
-      </main>
-    </div>
   );
 }

@@ -78,26 +78,21 @@ const projects = [
 
 export default function Profile() {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Sidebar />
-
-      <main className="pl-64 pt-16">
-        <div className="p-8">
-          {/* Header Actions */}
-          <div className="flex justify-end gap-3 mb-6">
-            <Button variant="outline" className="gap-2">
-              <Share2 className="h-4 w-4" />
-              Share Profile
-            </Button>
-            <Button variant="outline" className="gap-2">
-              <Edit className="h-4 w-4" />
-              Edit Profile
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Settings className="h-5 w-5" />
-            </Button>
-          </div>
+    <div className="p-8">
+      {/* Header Actions */}
+      <div className="flex justify-end gap-3 mb-6">
+        <Button variant="outline" className="gap-2">
+          <Share2 className="h-4 w-4" />
+          Share Profile
+        </Button>
+        <Button variant="outline" className="gap-2">
+          <Edit className="h-4 w-4" />
+          Edit Profile
+        </Button>
+        <Button variant="ghost" size="icon">
+          <Settings className="h-5 w-5" />
+        </Button>
+      </div>
 
           {/* User Profile */}
           <UserProfile user={mockUser} variant="full" />
@@ -156,7 +151,5 @@ export default function Profile() {
             </TabsContent>
           </Tabs>
         </div>
-      </main>
-    </div>
   );
 }

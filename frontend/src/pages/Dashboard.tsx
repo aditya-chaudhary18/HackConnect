@@ -7,13 +7,13 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
 import { HackathonCard } from "@/components/features/HackathonCard";
 import { TeamCard } from "@/components/features/TeamCard";
-import { NotificationPanel } from "@/components/features/NotificationPanel";
 import {
   Calendar,
   Trophy,
   Users,
   Zap,
   ArrowRight,
+  Bell,
   Clock,
   TrendingUp,
   MessageSquare,
@@ -67,31 +67,31 @@ const recentActivity = [
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Sidebar />
+    <div className="p-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Welcome back, John! 👋</h1>
+          <p className="text-muted-foreground">Here's what's happening with your hackathons</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground">
+              3
+            </span>
+          </Button>
+          <Link to="/explore">
+            <Button variant="neon">
+              Find Hackathons
+              <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
+          </Link>
+        </div>
+      </div>
 
-      <main className="pl-64 pt-16">
-        <div className="p-8">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold">Welcome back, John! 👋</h1>
-              <p className="text-muted-foreground">Here's what's happening with your hackathons</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <NotificationPanel />
-              <Link to="/explore">
-                <Button variant="neon">
-                  Find Hackathons
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Card variant="elevated">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -326,7 +326,5 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
   );
 }

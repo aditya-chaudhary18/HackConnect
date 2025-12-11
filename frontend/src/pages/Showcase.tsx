@@ -120,19 +120,14 @@ export default function Showcase() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Sidebar />
-
-      <main className="pl-64 pt-16">
-        <div className="p-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Project Showcase</h1>
-            <p className="text-muted-foreground">
-              Discover amazing projects built at hackathons worldwide
-            </p>
-          </div>
+    <div className="p-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Project Showcase</h1>
+        <p className="text-muted-foreground">
+          Discover amazing projects built at hackathons worldwide
+        </p>
+      </div>
 
           {/* Winner Spotlight */}
           <Card variant="neon" className="mb-8 overflow-hidden">
@@ -301,7 +296,5 @@ export default function Showcase() {
             ))}
           </div>
         </div>
-      </main>
-    </div>
   );
 }
