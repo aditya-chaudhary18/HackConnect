@@ -21,6 +21,8 @@ import {
   Pin,
   PanelRightClose,
   PanelRightOpen,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -134,6 +136,7 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [showChannels, setShowChannels] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
+  const [isChannelListCollapsed, setIsChannelListCollapsed] = useState(false);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,18 +159,28 @@ export default function Chat() {
         <div
           className={cn(
             "border-r border-border/50 flex flex-col transition-all duration-300 bg-background",
-            showChannels ? "w-72 md:w-72" : "w-0 overflow-hidden",
-            "absolute lg:relative z-20 h-full lg:h-auto"
+            showChannels ? (isChannelListCollapsed ? "w-[70px]" : "w-72") : "w-0 overflow-hidden",
+            "absolute lg:relative z-30 h-full"
           )}
         >
-          <div className="p-4 border-b border-border/50">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search messages..."
-                className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
+          <div className={cn("p-4 border-b border-border/50 flex items-center", isChannelListCollapsed ? "justify-center" : "justify-between gap-2")}>
+            {!isChannelListCollapsed && (
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search..."
+                  className="pl-10 h-9 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 flex-shrink-0"
+              onClick={() => setIsChannelListCollapsed(!isChannelListCollapsed)}
+            >
+              {isChannelListCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
           </div>
 
             <ScrollArea className="flex-1">
@@ -180,23 +193,24 @@ export default function Chat() {
                       if (window.innerWidth < 1024) setShowChannels(false);
                     }}
                     className={cn(
-                      "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200 animate-fade-in",
+                      "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200 animate-fade-in group",
                       "hover:scale-[1.02] active:scale-[0.98]",
                       selectedChannel.id === channel.id
                         ? "bg-primary/10 border border-primary/30 shadow-sm"
-                        : "hover:bg-muted"
+                        : "hover:bg-muted",
+                      isChannelListCollapsed && "justify-center px-2"
                     )}
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
-                    <div className="relative">
+                    <div className="relative flex-shrink-0">
                       {channel.type === "direct" ? (
-                        <Avatar className="h-10 w-10 transition-transform duration-200 hover:scale-110">
+                        <Avatar className="h-10 w-10 transition-transform duration-200 group-hover:scale-110">
                           <AvatarFallback className="bg-muted">
                             {channel.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                       ) : (
-                        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center transition-all duration-200 hover:bg-primary/10">
+                        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center transition-all duration-200 group-hover:bg-primary/10">
                           {channel.type === "team" ? (
                             <Users className="h-5 w-5 text-muted-foreground" />
                           ) : (
@@ -210,17 +224,22 @@ export default function Chat() {
                         </span>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium truncate">{channel.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatTime(channel.lastMessage.createdAt)}
-                        </span>
+                    
+                    {!isChannelListCollapsed && (
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="mb-1">
+                          <span className="font-medium truncate block">{channel.name}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span className="truncate mr-2">
+                            {channel.lastMessage.senderName}: {channel.lastMessage.content}
+                          </span>
+                          <span className="whitespace-nowrap flex-shrink-0 tabular-nums">
+                            {formatTime(channel.lastMessage.createdAt)}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {channel.lastMessage.senderName}: {channel.lastMessage.content}
-                      </p>
-                    </div>
+                    )}
                   </button>
                 ))}
               </div>
@@ -228,9 +247,9 @@ export default function Chat() {
           </div>
 
           {/* Chat Area - Flexible */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             {/* Chat Header */}
-            <div className="p-4 border-b border-border/50 flex items-center justify-between bg-background/95 backdrop-blur-sm">
+            <div className="p-4 border-b border-border/50 flex items-center justify-between bg-background/95 backdrop-blur-sm flex-shrink-0">
               <div className="flex items-center gap-3">
                 <Button
                   variant="ghost"
@@ -303,7 +322,7 @@ export default function Chat() {
             </ScrollArea>
 
             {/* Message Input - Responsive */}
-            <div className="p-4 border-t border-border/50 bg-background/95 backdrop-blur-sm">
+            <div className="p-4 border-t border-border/50 bg-background/95 backdrop-blur-sm flex-shrink-0">
               <form onSubmit={handleSendMessage} className="flex items-center gap-2 max-w-3xl mx-auto">
                 <Button
                   type="button"
