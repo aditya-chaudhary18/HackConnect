@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { NotificationPanel } from "@/components/features/NotificationPanel";
 import { 
   Zap, 
   Menu, 
   X, 
   Search,
-  Bell,
   User,
   Settings
 } from "lucide-react";
@@ -43,12 +43,7 @@ export function Navbar() {
                 <Button variant="ghost" size="icon" className="relative interactive-scale">
                   <Search className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="relative interactive-scale">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground animate-pulse">
-                    3
-                  </span>
-                </Button>
+                <NotificationPanel />
                 <Link to="/settings">
                   <Button variant="ghost" size="icon" className="interactive-scale">
                     <Settings className="h-5 w-5" />

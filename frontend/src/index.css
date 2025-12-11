@@ -296,6 +296,50 @@
   }
 }
 
+/* Notification Panel Glass Morphism Animations */
+@keyframes glass-blur-in {
+  0% {
+    backdrop-filter: blur(0px);
+    opacity: 0;
+  }
+  100% {
+    backdrop-filter: blur(12px);
+    opacity: 1;
+  }
+}
+
+@keyframes panel-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+@keyframes notification-stagger-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-glass-blur-in {
+  animation: glass-blur-in 0.5s ease-out forwards;
+}
+
+.animate-panel-slide-in {
+  animation: panel-slide-in 0.5s ease-out forwards;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
