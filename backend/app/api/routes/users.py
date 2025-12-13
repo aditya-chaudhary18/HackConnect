@@ -13,17 +13,17 @@ def get_user_profile(user_id: str):
         
         try:
             # 1. Fetch from Appwrite Database (Profile Data)
+            # Note: We use 'get_document' here (Standard Appwrite SDK)
             doc = db.get_document(
                 database_id=settings.APPWRITE_DATABASE_ID,
                 collection_id=settings.COLLECTION_USERS,
                 document_id=user_id
             )
             
-            # 2. Fetch from Appwrite Auth (Account Data like Email/Name)
-            # We use the 'account_id' from the doc, or 'user_id' if they are the same (which they are in our logic)
+            # 2. Fetch from Appwrite Auth (Account Data)
             auth_user = users.get(user_id)
 
-            # Map to UserResponse
+            # 3. Merge and Return
             return {
                 "id": doc['$id'],
                 "username": doc.get('username'),
@@ -41,7 +41,6 @@ def get_user_profile(user_id: str):
             }
             
         except Exception as e:
-            # If document not found
             if "404" in str(e):
                 raise HTTPException(status_code=404, detail="User not found")
             raise e

@@ -2,11 +2,12 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 class TeamBase(BaseModel):
-    name: str
+    
     hackathon_id: str
+    name: str
     leader_id: str
     members: List[str] = []     # Must be an Array in Appwrite!
-    looking_for: List[str] = [] # Matches looking_for[]
+    looking_for: List[str] = [] # Matches looking_for[] column
     status: str = "open"        # Enum: 'open', 'closed', 'full'
     project_repo: Optional[str] = None
 
