@@ -1,33 +1,47 @@
-from pydantic import BaseModel, EmailStr, Field, HttpUrl
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
 
-# Shared Properties (Matches your Schema)
+# --- 1. SHARED SCHEMA (Matches your Appwrite Images) ---
 class UserBase(BaseModel):
-    username: str
+    username: str             # 'username' column
+    account_id: str           # 'account_id' column
     bio: Optional[str] = None
-    avatar_url: Optional[str] = None # Using str because HttpUrl can be tricky with empty strings
+    avatar_url: Optional[str] = None
     github_url: Optional[str] = None
-    skills: List[str] = []
-    xp: int = 0
+    skills: List[str] = []    # 'skills' column
+    xp: int = 0               # 'xp' column
     reputation_score: float = 0.0
-    account_id: str  # The link to Appwrite Auth
 
-# Input for Registration
+# --- 2. REGISTER INPUT ---
 class UserRegister(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
     name: str
     username: str
 
-# Input for Login Sync
+# --- 3. LOGIN INPUT (For Strict Check) ---
 class UserLoginSync(BaseModel):
-    id: str         # Auth ID
-    email: EmailStr
-    name: str
-    username: Optional[str] = None
+    id: str  # The Appwrite Auth ID
+    # We don't strictly need email/name here for the check, but good to have
+    email: Optional[str] = None 
 
-# Output Response
+# --- 4. UPDATE PROFILE INPUT ---
+class UserUpdate(BaseModel):
+    user_id: str
+    bio: Optional[str] = None
+    skills: Optional[List[str]] = None
+    github_url: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+# --- 5. CHANGE PASSWORD INPUT ---
+class PasswordChange(BaseModel):
+    user_id: str
+    new_password: str = Field(..., min_length=8)
+
+# --- 6. RESPONSE OUTPUT ---
 class UserResponse(UserBase):
-    id: str # The $id
+    id: str
     created_at: str
     updated_at: str
+    email: str # Added for Ansh's endpoint
+    name: str  # Added for Ansh's endpoint
