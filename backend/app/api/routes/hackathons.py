@@ -18,11 +18,11 @@ def create_hackathon(hackathon: HackathonCreate):
         # Convert Dates to Strings
         data_to_save = jsonable_encoder(hackathon)
         
-        # FIX: Use 'create_row' instead of 'create_document'
-        result = db.create_row(
+        # FIX: Changed 'create_row' to 'create_document'
+        result = db.create_document(
             database_id=settings.APPWRITE_DATABASE_ID,
-            table_id=settings.COLLECTION_HACKATHONS, # Use 'table_id'
-            row_id=ID.unique(),                      # Use 'row_id'
+            collection_id=settings.COLLECTION_HACKATHONS, # Changed 'table_id' to 'collection_id'
+            document_id=ID.unique(),                     # Changed 'row_id' to 'document_id'
             data=data_to_save
         )
         return {"success": True, "data": result}
@@ -37,14 +37,14 @@ def get_hackathons():
     try:
         db = get_db_service()
         
-        # FIX: Use 'list_rows' instead of 'list_documents'
-        result = db.list_rows(
+        # FIX: Changed 'list_rows' to 'list_documents'
+        result = db.list_documents(
             database_id=settings.APPWRITE_DATABASE_ID,
-            table_id=settings.COLLECTION_HACKATHONS
+            collection_id=settings.COLLECTION_HACKATHONS # Changed 'table_id' to 'collection_id'
         )
         
-        # The key is now 'rows'
-        return {"success": True, "documents": result['rows']}
+        # The key is 'documents', NOT 'rows'
+        return {"success": True, "documents": result['documents']}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -55,13 +55,13 @@ def get_recommendations(user_tags: List[str]):
     try:
         db = get_db_service()
         
-        # FIX: Use 'list_rows'
-        all_data = db.list_rows(
+        # FIX: Changed 'list_rows' to 'list_documents'
+        all_data = db.list_documents(
             database_id=settings.APPWRITE_DATABASE_ID,
-            table_id=settings.COLLECTION_HACKATHONS
+            collection_id=settings.COLLECTION_HACKATHONS # Changed 'table_id' to 'collection_id'
         )
         
-        documents = all_data['rows']
+        documents = all_data['documents'] # Changed 'rows' to 'documents'
         matches = []
 
         if not user_tags:

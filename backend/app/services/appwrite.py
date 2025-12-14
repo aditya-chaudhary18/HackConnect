@@ -1,5 +1,5 @@
 from appwrite.client import Client
-from appwrite.services.databases import Databases # <--- CORRECT IMPORT
+from appwrite.services.databases import Databases  # <--- NEW IMPORT (Was TablesDB)
 from appwrite.services.users import Users
 from app.core.config import settings
 
@@ -12,7 +12,7 @@ def get_appwrite_client():
 
 def get_db_service():
     client = get_appwrite_client()
-    return Databases(client)  # <--- CORRECT CLASS
+    return Databases(client)  # <--- RETURNS 'DATABASES' (Not TablesDB)
 
 def get_users_service():
     client = get_appwrite_client()
