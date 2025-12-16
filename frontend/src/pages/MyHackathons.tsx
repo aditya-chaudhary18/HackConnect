@@ -32,6 +32,7 @@ export default function MyHackathons() {
               totalPrizePool: parseInt(h.prize_pool) || 0,
               currency: "USD",
               status: h.status,
+              my_team: h.my_team // Pass the team info
             }));
             setHackathons(mapped);
           }

@@ -8,7 +8,7 @@ import type { Hackathon } from "@/types/hackathon";
 import { useNavigate } from "react-router-dom";
 
 interface HackathonCardProps {
-  hackathon: Partial<Hackathon>;
+  hackathon: Partial<Hackathon> & { my_team?: any };
   variant?: "default" | "featured" | "compact";
   onClick?: () => void;
 }
@@ -201,6 +201,17 @@ export function HackathonCard({ hackathon, variant = "default", onClick }: Hacka
             </Badge>
           ))}
         </div>
+        
+        {/* My Team Info */}
+        {(hackathon as any).my_team && (
+          <div className="mt-3 p-2 bg-primary/10 rounded-md border border-primary/20">
+            <p className="text-xs font-medium text-primary mb-1">Registered Team:</p>
+            <div className="flex items-center gap-2">
+              <Users className="h-3 w-3 text-primary" />
+              <span className="text-sm font-semibold">{(hackathon as any).my_team.name}</span>
+            </div>
+          </div>
+        )}
       </CardContent>
 
       <CardFooter>
@@ -209,7 +220,7 @@ export function HackathonCard({ hackathon, variant = "default", onClick }: Hacka
           variant={variant === "featured" ? "neon" : "default"}
           onClick={onClick}
         >
-          View Details
+          {(hackathon as any).my_team ? "View Dashboard" : "View Details"}
         </Button>
       </CardFooter>
     </Card>

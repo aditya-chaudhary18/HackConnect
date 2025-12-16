@@ -114,8 +114,11 @@ def get_user_hackathons(user_id: str):
             ]
         )
 
-        # 2. Extract Hackathon IDs
-        hackathon_ids = list(set([team['hackathon_id'] for team in teams_result['documents']]))
+        # 2. Map Hackathon ID to Team
+        # A user might be in multiple teams for different hackathons, but usually 1 team per hackathon.
+        # We'll create a map: hackathon_id -> team_document
+        hackathon_team_map = {team['hackathon_id']: team for team in teams_result['documents']}
+        hackathon_ids = list(hackathon_team_map.keys())
         
         if not hackathon_ids:
             return {"success": True, "hackathons": []}
@@ -129,7 +132,18 @@ def get_user_hackathons(user_id: str):
             ]
         )
         
-        return {"success": True, "hackathons": hackathons_result['documents']}
+        # 4. Combine Hackathon + Team Info
+        combined_results = []
+        for hackathon in hackathons_result['documents']:
+            team = hackathon_team_map.get(hackathon['$id'])
+            # Add team info to the hackathon object or wrap it
+            # Let's wrap it to be clean
+            combined_results.append({
+                **hackathon,
+                "my_team": team
+            })
+        
+        return {"success": True, "hackathons": combined_results}
 
     except Exception as e:
         print(f"Error fetching user hackathons: {e}")

@@ -4,6 +4,7 @@ from app.services.appwrite import get_db_service
 from app.core.config import settings
 from app.models.hackathon import HackathonCreate
 from appwrite.id import ID
+from appwrite.query import Query
 from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()
@@ -90,4 +91,25 @@ def get_recommendations(user_tags: List[str]):
         return {"success": True, "count": len(matches), "documents": matches}
 
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --- 5. GET HACKATHON TEAMS (Organizer View) ---
+
+@router.get("/{hackathon_id}/teams", summary="Get all teams registered for a hackathon")
+def get_hackathon_teams(hackathon_id: str):
+    try:
+        db = get_db_service()
+        
+        # Query teams where hackathon_id matches
+        result = db.list_documents(
+            database_id=settings.APPWRITE_DATABASE_ID,
+            collection_id=settings.COLLECTION_TEAMS,
+            queries=[
+                Query.equal('hackathon_id', hackathon_id)
+            ]
+        )
+        
+        return {"success": True, "teams": result['documents']}
+    except Exception as e:
+        print(f"Error fetching hackathon teams: {e}")
         raise HTTPException(status_code=500, detail=str(e))
