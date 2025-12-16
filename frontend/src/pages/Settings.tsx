@@ -11,14 +11,9 @@ import { Navbar } from "@/components/layout/Navbar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTheme } from "@/hooks/useTheme";
 import {
-  User,
   Bell,
   Shield,
   Palette,
-  Globe,
-  Key,
-  Webhook,
-  Save,
   Moon,
   Sun,
   Monitor,
@@ -42,12 +37,8 @@ export default function Settings() {
         <p className="text-muted-foreground">Manage your account preferences and settings</p>
       </div>
 
-          <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 lg:w-[600px]">
-              <TabsTrigger value="profile" className="gap-2">
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Profile</span>
-              </TabsTrigger>
+          <Tabs defaultValue="notifications" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
               <TabsTrigger value="notifications" className="gap-2">
                 <Bell className="h-4 w-4" />
                 <span className="hidden sm:inline">Notifications</span>
@@ -60,44 +51,7 @@ export default function Settings() {
                 <Shield className="h-4 w-4" />
                 <span className="hidden sm:inline">Security</span>
               </TabsTrigger>
-              <TabsTrigger value="developer" className="gap-2">
-                <Key className="h-4 w-4" />
-                <span className="hidden sm:inline">Developer</span>
-              </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="profile" className="space-y-6 animate-fade-in">
-              <Card className="border-border/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-                <CardHeader>
-                  <CardTitle>Profile Information</CardTitle>
-                  <CardDescription>Update your personal details</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" placeholder="John" className="transition-all duration-200 focus:scale-[1.01]" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" placeholder="Doe" className="transition-all duration-200 focus:scale-[1.01]" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="john@example.com" className="transition-all duration-200 focus:scale-[1.01]" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Input id="bio" placeholder="Tell us about yourself..." className="transition-all duration-200 focus:scale-[1.01]" />
-                  </div>
-                  <Button className="gap-2 transition-all duration-200 hover:scale-105 active:scale-95">
-                    <Save className="h-4 w-4" />
-                    Save Changes
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
             <TabsContent value="notifications" className="space-y-6 animate-fade-in">
               <Card className="border-border/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
@@ -205,48 +159,6 @@ export default function Settings() {
                   <Button className="gap-2 transition-all duration-200 hover:scale-105 active:scale-95">
                     <Shield className="h-4 w-4" />
                     Update Password
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="developer" className="space-y-6 animate-fade-in">
-              <Card className="border-border/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-                <CardHeader>
-                  <CardTitle>API Keys</CardTitle>
-                  <CardDescription>Manage your API access tokens</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 rounded-lg bg-muted/50 font-mono text-sm break-all border border-border/50">
-                    hk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="transition-all duration-200 hover:scale-105 active:scale-95">
-                      Regenerate Key
-                    </Button>
-                    <Button variant="outline" className="transition-all duration-200 hover:scale-105 active:scale-95">
-                      Copy
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Webhook className="h-5 w-5" />
-                    Webhooks
-                  </CardTitle>
-                  <CardDescription>Configure webhook endpoints</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="webhookUrl">Webhook URL</Label>
-                    <Input id="webhookUrl" placeholder="https://your-app.com/webhook" className="transition-all duration-200 focus:scale-[1.01]" />
-                  </div>
-                  <Button className="gap-2 transition-all duration-200 hover:scale-105 active:scale-95">
-                    <Save className="h-4 w-4" />
-                    Save Webhook
                   </Button>
                 </CardContent>
               </Card>

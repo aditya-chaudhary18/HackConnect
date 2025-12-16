@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { X, Bell, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { createPortal } from "react-dom";
+
 
 interface Notification {
   id: string;
@@ -55,23 +57,8 @@ function formatTime(date: Date): string {
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
   if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-  
-  return date.toLocaleDateString();
-}
 
-function getNotificationColor(type: Notification["type"]) {
-  switch (type) {
-    case "success":
-      return "bg-green-500/20 border-green-500/30 text-green-700 dark:text-green-400";
-    case "info":
-      return "bg-blue-500/20 border-blue-500/30 text-blue-700 dark:text-blue-400";
-    case "warning":
-      return "bg-yellow-500/20 border-yellow-500/30 text-yellow-700 dark:text-yellow-400";
-    case "error":
-      return "bg-red-500/20 border-red-500/30 text-red-700 dark:text-red-400";
-    default:
-      return "bg-gray-500/20 border-gray-500/30";
-  }
+  return date.toLocaleDateString();
 }
 
 export function NotificationPanel() {
@@ -87,8 +74,8 @@ export function NotificationPanel() {
     if (isOpen && bellButtonRef.current) {
       const rect = bellButtonRef.current.getBoundingClientRect();
       setPanelPosition({
-        top: rect.bottom + 8, // 8px gap below the button
-        right: window.innerWidth - rect.right, // Align right edge with bell
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
       });
     }
   }, [isOpen]);
@@ -109,26 +96,31 @@ export function NotificationPanel() {
 
   return (
     <>
-      {/* Backdrop with blur effect */}
-      {isOpen && (
-        <div
-          className="fixed inset-0  bg-black/40 backdrop-blur-sm transition-opacity duration-300"
-          onClick={() => setIsOpen(false)}
-          style={{ pointerEvents: 'auto' }}
-        />
-      )}
+      {/* Backdrop */}
+      {isOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
+            onClick={() => setIsOpen(false)}
+          />,
+          document.body
+        )
+      }
+
 
       {/* Notification Bell Button */}
       <Button
         ref={bellButtonRef}
         variant="ghost"
         size="icon"
-        className="relative interactive-scale"
+        className="relative"
         onClick={() => setIsOpen(!isOpen)}
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground animate-pulse">
+          <span
+            className="absolute -top-1 -right-1 h-5 w-5 rounded-full text-[10px] font-bold flex items-center justify-center text-white bg-blue-600"
+          >
             {unreadCount}
           </span>
         )}
@@ -137,8 +129,7 @@ export function NotificationPanel() {
       {/* Notification Panel */}
       <div
         className={cn(
-          "fixed w-96 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] rounded-2xl border border-white/40 bg-white/95 backdrop-blur-2xl shadow-2xl transition-all duration-300 ease-out ",
-          "dark:bg-slate-950/90 dark:border-slate-600/60 dark:shadow-2xl dark:shadow-slate-900/50",
+          "fixed w-96 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] rounded-lg overflow-hidden transition-all duration-300 ease-out border border-border bg-background",
           isOpen
             ? "opacity-100 scale-100 visible"
             : "opacity-0 scale-95 invisible pointer-events-none"
@@ -147,18 +138,24 @@ export function NotificationPanel() {
           top: `${panelPosition.top}px`,
           right: `${panelPosition.right}px`,
           transformOrigin: "top right",
-          backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+          zIndex: 50,
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-300/40 dark:border-slate-700/50 bg-gradient-to-r from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary/15 dark:bg-primary/20">
+        <div
+          className="flex items-center justify-between p-5 border-b border-border"
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="p-2 rounded-lg bg-primary/10"
+            >
               <Bell className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="font-bold text-lg">Notifications</h2>
+            <h2 className="font-bold text-xl">Notifications</h2>
             {unreadCount > 0 && (
-              <span className="ml-2 px-2.5 py-1 text-xs font-bold bg-primary/30 text-primary rounded-full shadow-sm">
+              <span
+                className="ml-1 px-3 py-1 text-xs font-bold rounded-full bg-primary/10 text-primary border border-primary/20"
+              >
                 {unreadCount} new
               </span>
             )}
@@ -166,7 +163,7 @@ export function NotificationPanel() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 hover:bg-slate-300/40 dark:hover:bg-slate-700/50 rounded-lg"
+            className="h-9 w-9 rounded-lg transition-all"
             onClick={() => setIsOpen(false)}
           >
             <X className="h-4 w-4" />
@@ -174,59 +171,68 @@ export function NotificationPanel() {
         </div>
 
         {/* Notifications List */}
-        <div className="overflow-y-auto max-h-[calc(100vh-14rem)] scrollbar-hide">
+        <div className="overflow-y-auto max-h-[calc(100vh-14rem)]">
           {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <Bell className="h-12 w-12 opacity-30 mb-3" />
-              <p className="text-sm text-muted-foreground">No notifications yet</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+              <div
+                className="p-6 rounded-lg mb-4 bg-muted"
+              >
+                <Bell className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <p className="text-base font-semibold">No notifications yet</p>
+              <p className="text-sm text-muted-foreground mt-2">
                 We'll let you know when something happens
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-300/30 dark:divide-slate-700/40">
-              {notifications.map((notification) => (
+            <div>
+              {notifications.map((notification, index) => (
                 <div
                   key={notification.id}
                   className={cn(
-                    "p-4 hover:bg-slate-200/40 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group",
-                    !notification.read && "bg-blue-50/60 dark:bg-slate-800/40 border-l-3 border-primary/40"
+                    "p-5 transition-all cursor-pointer group border-b border-border last:border-b-0",
+                    !notification.read && "bg-primary/5 border-l-2 border-l-primary"
                   )}
                   onClick={() => handleMarkAsRead(notification.id)}
                 >
-                  <div className="flex gap-3">
+                  <div className="flex gap-4">
                     {/* Notification Indicator */}
                     <div
                       className={cn(
-                        "flex-shrink-0 w-2 h-2 rounded-full mt-2",
-                        !notification.read ? "bg-primary" : "bg-transparent"
+                        "flex-shrink-0 w-2.5 h-2.5 rounded-full mt-2",
+                        !notification.read && "bg-primary"
                       )}
                     />
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className={cn("font-semibold text-sm", !notification.read && "text-primary")}>
+                          <p
+                            className={cn(
+                              "font-bold text-sm",
+                              !notification.read && "text-primary"
+                            )}
+                          >
                             {notification.title}
                           </p>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
                             {notification.message}
                           </p>
                         </div>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                          className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0 rounded-lg text-destructive hover:bg-destructive/10"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteNotification(notification.id);
                           }}
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-2">
+                      <p className="text-xs text-muted-foreground mt-2.5 font-medium">
                         {formatTime(notification.timestamp)}
                       </p>
                     </div>
@@ -239,11 +245,13 @@ export function NotificationPanel() {
 
         {/* Footer */}
         {notifications.length > 0 && (
-          <div className="p-4 border-t border-slate-300/40 dark:border-slate-700/50 flex gap-2 bg-gradient-to-r from-slate-50/50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-850/50">
+          <div
+            className="p-5 flex gap-3 border-t border-border"
+          >
             <Button
               variant="ghost"
               size="sm"
-              className="flex-1 text-xs font-medium hover:bg-slate-300/40 dark:hover:bg-slate-700/60 rounded-lg"
+              className="flex-1 text-sm font-semibold rounded-lg"
               onClick={handleClearAll}
             >
               Clear All
@@ -251,7 +259,7 @@ export function NotificationPanel() {
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 text-xs font-medium bg-primary/10 hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30 border-primary/30 dark:border-primary/40 text-primary rounded-lg"
+              className="flex-1 text-sm font-semibold rounded-lg"
               onClick={() => setIsOpen(false)}
             >
               Done

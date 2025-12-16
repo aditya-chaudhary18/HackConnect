@@ -97,12 +97,7 @@ export default function Dashboard() {
             <p className="text-muted-foreground">Manage your hackathons and community</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground">
-                5
-              </span>
-            </Button>
+            
             <Link to="/create-hackathon">
               <Button variant="neon">
                 <Zap className="h-4 w-4 mr-2" />
@@ -270,12 +265,7 @@ export default function Dashboard() {
           <p className="text-muted-foreground">Here's what's happening with your hackathons</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground">
-              3
-            </span>
-          </Button>
+          
           <Link to="/explore">
             <Button variant="neon">
               Find Hackathons

@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HackathonCard } from "@/components/features/HackathonCard";
-import { Edit, Share2, Settings } from "lucide-react";
+import { Edit, Share2, Settings, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { EditProfileDialog } from "@/components/features/EditProfileDialog";
 
@@ -81,7 +82,13 @@ const projects = [
 ];
 
 export default function Profile() {
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   if (!user) return null; // Should be handled by AppLayout, but safe guard
 
@@ -155,6 +162,18 @@ export default function Profile() {
               </Card>
             </TabsContent>
           </Tabs>
+
+          {/* Logout Button */}
+          <div className="mt-8 flex justify-end">
+            <Button 
+              variant="destructive" 
+              className="gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Log out
+            </Button>
+          </div>
         </div>
   );
 }
