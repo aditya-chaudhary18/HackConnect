@@ -17,6 +17,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import CreateHackathon from "./pages/CreateHackathon";
 import HackathonDetails from "./pages/HackathonDetails";
+import MyHackathons from "./pages/MyHackathons";
 
 const queryClient = new QueryClient();
 
@@ -41,7 +42,7 @@ const App = () => (
             <Route path="/profile/:id" element={<Profile />} />
             <Route path="/showcase" element={<Showcase />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/my-hackathons" element={<Dashboard />} />
+            <Route path="/my-hackathons" element={<MyHackathons />} />
             <Route path="/create-hackathon" element={<CreateHackathon />} />
             <Route path="/hackathons/:id" element={<HackathonDetails />} />
           </Route>

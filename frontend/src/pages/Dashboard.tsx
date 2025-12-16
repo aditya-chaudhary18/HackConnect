@@ -47,6 +47,7 @@ export default function Dashboard() {
   const { user, isLoading } = useAuth();
   const { fetchHackathons } = useHackathons();
   const [hackathons, setHackathons] = useState<any[]>([]);
+  const [myHackathons, setMyHackathons] = useState<any[]>([]);
   const [visibleCount, setVisibleCount] = useState(4); // Show 4 initially
   const isOrganizer = user?.role === 'organizer';
 
@@ -59,6 +60,36 @@ export default function Dashboard() {
     };
     loadHackathons();
   }, [fetchHackathons]);
+
+  useEffect(() => {
+    const fetchMyHackathons = async () => {
+      if (!user?.id) return;
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+        const response = await fetch(`${API_URL}/users/${user.id}/hackathons`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.hackathons) {
+            const mapped = data.hackathons.map((h: any) => ({
+              id: h.$id || h.id,
+              title: h.name,
+              shortDescription: h.tagline || h.description?.substring(0, 100) || "",
+              coverImage: h.image_url || "https://images.unsplash.com/photo-1504384308090-c54be3855463?q=80&w=1200&auto=format&fit=crop",
+              startDate: new Date(h.start_date),
+              location: { type: h.mode === 'online' ? 'online' : 'in-person', city: h.location },
+              totalPrizePool: parseInt(h.prize_pool) || 0,
+              currency: "USD",
+              status: h.status,
+            }));
+            setMyHackathons(mapped);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch my hackathons", error);
+      }
+    };
+    fetchMyHackathons();
+  }, [user]);
 
   const handleViewMore = () => {
     setVisibleCount((prev) => prev + 4);
@@ -358,11 +389,20 @@ export default function Dashboard() {
                   </Link>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {upcomingHackathons.slice(0, visibleCount).map((hackathon) => (
-                    <HackathonCard key={hackathon.id} hackathon={hackathon as any} variant="compact" />
-                  ))}
+                  {myHackathons.length > 0 ? (
+                    myHackathons.slice(0, visibleCount).map((hackathon) => (
+                      <HackathonCard key={hackathon.id} hackathon={hackathon as any} variant="compact" />
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-8 text-muted-foreground border border-dashed rounded-lg">
+                      <p className="mb-2">You haven't joined any hackathons yet.</p>
+                      <Link to="/explore">
+                        <Button variant="link" className="text-primary">Explore Hackathons</Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
-                {upcomingHackathons.length > visibleCount && (
+                {myHackathons.length > visibleCount && (
                   <div className="mt-4 text-center">
                     <Button variant="outline" onClick={handleViewMore}>
                       View More

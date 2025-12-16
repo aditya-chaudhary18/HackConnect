@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.services.appwrite import get_db_service, get_users_service
 from app.core.config import settings
 from app.models.user import UserResponse, UserUpdate
+from appwrite.query import Query
 
 router = APIRouter()
 
@@ -97,4 +98,39 @@ def update_user_profile(user_id: str, user_update: UserUpdate):
     except HTTPException as he:
         raise he
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{user_id}/hackathons", summary="Get User's Hackathons")
+def get_user_hackathons(user_id: str):
+    try:
+        db = get_db_service()
+        
+        # 1. Find teams where user is a member
+        teams_result = db.list_documents(
+            database_id=settings.APPWRITE_DATABASE_ID,
+            collection_id=settings.COLLECTION_TEAMS,
+            queries=[
+                Query.equal('members', user_id)
+            ]
+        )
+
+        # 2. Extract Hackathon IDs
+        hackathon_ids = list(set([team['hackathon_id'] for team in teams_result['documents']]))
+        
+        if not hackathon_ids:
+            return {"success": True, "hackathons": []}
+
+        # 3. Fetch Hackathon Details
+        hackathons_result = db.list_documents(
+            database_id=settings.APPWRITE_DATABASE_ID,
+            collection_id=settings.COLLECTION_HACKATHONS,
+            queries=[
+                Query.equal('$id', hackathon_ids)
+            ]
+        )
+        
+        return {"success": True, "hackathons": hackathons_result['documents']}
+
+    except Exception as e:
+        print(f"Error fetching user hackathons: {e}")
         raise HTTPException(status_code=500, detail=str(e))

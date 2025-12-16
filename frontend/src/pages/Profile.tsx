@@ -40,31 +40,6 @@ const mockUser = {
 };
 */
 
-const pastHackathons = [
-  {
-    id: "1",
-    title: "ETHGlobal Paris 2023",
-    shortDescription: "Built a decentralized identity solution",
-    coverImage: "https://images.unsplash.com/photo-1549924231-f129b911e442?w=400&q=80",
-    startDate: new Date("2023-07-21"),
-    location: { type: "in-person" as const, city: "Paris" },
-    totalPrizePool: 50000,
-    currency: "EUR",
-    status: "ended" as const,
-  },
-  {
-    id: "2",
-    title: "AI Builders Hackathon",
-    shortDescription: "Created an AI-powered code review tool",
-    coverImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80",
-    startDate: new Date("2023-09-15"),
-    location: { type: "online" as const },
-    totalPrizePool: 25000,
-    currency: "USD",
-    status: "ended" as const,
-  },
-];
-
 const projects = [
   {
     id: "1",
@@ -92,6 +67,7 @@ export default function Profile() {
   
   const [viewedUser, setViewedUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [participatedHackathons, setParticipatedHackathons] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -145,7 +121,37 @@ export default function Profile() {
       }
     };
 
+    const fetchHackathons = async () => {
+      const targetId = id || authUser?.id;
+      if (!targetId) return;
+
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+        const response = await fetch(`${API_URL}/users/${targetId}/hackathons`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.hackathons) {
+            const mapped = data.hackathons.map((h: any) => ({
+              id: h.$id || h.id,
+              title: h.name,
+              shortDescription: h.tagline || h.description?.substring(0, 100) || "",
+              coverImage: h.image_url || "https://images.unsplash.com/photo-1504384308090-c54be3855463?q=80&w=1200&auto=format&fit=crop",
+              startDate: new Date(h.start_date),
+              location: { type: h.mode === 'online' ? 'online' : 'in-person', city: h.location },
+              totalPrizePool: parseInt(h.prize_pool) || 0,
+              currency: "USD",
+              status: h.status,
+            }));
+            setParticipatedHackathons(mapped);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch hackathons", error);
+      }
+    };
+
     fetchUser();
+    fetchHackathons();
   }, [id, authUser, navigate, toast]);
 
   const handleLogout = async () => {
@@ -213,9 +219,15 @@ export default function Profile() {
 
             <TabsContent value="hackathons">
               <div className="grid md:grid-cols-2 gap-4">
-                {pastHackathons.map((hackathon) => (
-                  <HackathonCard key={hackathon.id} hackathon={hackathon} variant="compact" />
-                ))}
+                {participatedHackathons.length > 0 ? (
+                  participatedHackathons.map((hackathon) => (
+                    <HackathonCard key={hackathon.id} hackathon={hackathon} variant="compact" />
+                  ))
+                ) : (
+                  <div className="col-span-2 text-center py-8 text-muted-foreground">
+                    No hackathons participated yet.
+                  </div>
+                )}
               </div>
             </TabsContent>
 
