@@ -1,7 +1,8 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
 import { useHackathons } from "@/hooks/useHackathons";
 import { useTeams } from "@/hooks/useTeams";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,16 +11,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, MapPin, Users, Trophy, Share2, Globe, Monitor, Clock } from "lucide-react";
+import { Calendar, MapPin, Users, Trophy, Share2, Globe, Monitor, Clock, CheckCircle2, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 
 export default function HackathonDetails() {
   const { id } = useParams<{ id: string }>();
   const { getHackathon, isLoading: isHackathonLoading } = useHackathons();
   const { createTeam, isLoading: isTeamLoading } = useTeams();
+  const { myHackathons, isLoading: isDashboardLoading } = useDashboardData();
   const { toast } = useToast();
   const [hackathon, setHackathon] = useState<any>(null);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  
+  // Check if already registered
+  const registeredTeam = useMemo(() => {
+    if (!id || !myHackathons) return null;
+    const found = myHackathons.find((h: any) => (h.$id || h.id) === id);
+    return found?.my_team || null;
+  }, [id, myHackathons]);
   
   // Team Registration Form State
   const [teamForm, setTeamForm] = useState({
@@ -108,9 +117,77 @@ export default function HackathonDetails() {
               <p className="text-xl text-gray-200 mb-6">{hackathon.tagline}</p>
             )}
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="bg-primary hover:bg-primary/90" onClick={() => setIsRegisterOpen(true)}>
-                Register Team
-              </Button>
+              {isDashboardLoading ? (
+                <Button size="lg" disabled className="bg-primary/50">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                  Checking Status...
+                </Button>
+              ) : registeredTeam ? (
+                <div className="flex gap-4">
+                  <Button size="lg" className="bg-green-500 hover:bg-green-600 cursor-default">
+                    <CheckCircle2 className="mr-2 h-5 w-5" />
+                    Registered
+                  </Button>
+                </div>
+              ) : (
+                <Dialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="bg-primary hover:bg-primary/90">
+                      Register Team
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Register Team for {hackathon.name}</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleTeamSubmit} className="space-y-4 mt-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Team Name</Label>
+                        <Input
+                          id="name"
+                          placeholder="e.g. Code Crusaders"
+                          value={teamForm.name}
+                          onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="description">Team Description</Label>
+                        <Textarea
+                          id="description"
+                          placeholder="Briefly describe your team..."
+                          value={teamForm.description}
+                          onChange={(e) => setTeamForm({ ...teamForm, description: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="looking_for">Looking For (comma separated)</Label>
+                        <Input
+                          id="looking_for"
+                          placeholder="e.g. Frontend Dev, Designer"
+                          value={teamForm.looking_for}
+                          onChange={(e) => setTeamForm({ ...teamForm, looking_for: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="tech_stack">Tech Stack (comma separated)</Label>
+                        <Input
+                          id="tech_stack"
+                          placeholder="e.g. React, Python, AWS"
+                          value={teamForm.tech_stack}
+                          onChange={(e) => setTeamForm({ ...teamForm, tech_stack: e.target.value })}
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit" disabled={isTeamLoading}>
+                          {isTeamLoading ? "Registering..." : "Register Team"}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              )}
+              
               <Button size="lg" variant="outline" className="bg-background/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20" onClick={handleShare}>
                 <Share2 className="mr-2 h-4 w-4" />
                 Share
@@ -124,6 +201,49 @@ export default function HackathonDetails() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {registeredTeam && (
+              <section>
+                <h2 className="text-2xl font-bold mb-4">Your Team</h2>
+                <Card className="border-primary/50 bg-primary/5">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>{registeredTeam.name}</span>
+                      <Badge variant="outline" className="bg-background">{registeredTeam.status || "Competing"}</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">{registeredTeam.description}</p>
+                      
+                      <div>
+                        <p className="text-sm font-medium mb-2">Members ({registeredTeam.members?.length || 0})</p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex -space-x-2">
+                            {registeredTeam.members && registeredTeam.members.map((member: any, i: number) => (
+                              <div key={i} className="h-8 w-8 rounded-full bg-primary/20 border-2 border-background flex items-center justify-center text-xs font-medium">
+                                <Users className="h-4 w-4" />
+                              </div>
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {registeredTeam.members?.length === 1 ? "Solo" : "Team"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {registeredTeam.tech_stack && registeredTeam.tech_stack.length > 0 && (
+                        <div className="flex gap-2 flex-wrap">
+                          {registeredTeam.tech_stack.map((tech: string) => (
+                            <Badge key={tech} variant="secondary" className="text-xs">{tech}</Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+            )}
+
             <section>
               <h2 className="text-2xl font-bold mb-4">About the Hackathon</h2>
               <div className="prose dark:prose-invert max-w-none">
@@ -207,68 +327,6 @@ export default function HackathonDetails() {
         </div>
       </div>
 
-      {/* Registration Dialog */}
-      <Dialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Register Your Team</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleTeamSubmit} className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="teamName">Team Name</Label>
-              <Input 
-                id="teamName" 
-                value={teamForm.name}
-                onChange={(e) => setTeamForm({...teamForm, name: e.target.value})}
-                required 
-                placeholder="e.g. Code Crusaders"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="teamDesc">Description</Label>
-              <Textarea 
-                id="teamDesc" 
-                value={teamForm.description}
-                onChange={(e) => setTeamForm({...teamForm, description: e.target.value})}
-                required 
-                placeholder="What are you building?"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="techStack">Tech Stack (comma separated)</Label>
-              <Input 
-                id="techStack" 
-                value={teamForm.tech_stack}
-                onChange={(e) => setTeamForm({...teamForm, tech_stack: e.target.value})}
-                placeholder="React, Python, Appwrite"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lookingFor">Looking For (comma separated)</Label>
-              <Input 
-                id="lookingFor" 
-                value={teamForm.looking_for}
-                onChange={(e) => setTeamForm({...teamForm, looking_for: e.target.value})}
-                placeholder="Frontend Dev, Designer"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="repo">Project Repo (Optional)</Label>
-              <Input 
-                id="repo" 
-                value={teamForm.project_repo}
-                onChange={(e) => setTeamForm({...teamForm, project_repo: e.target.value})}
-                placeholder="https://github.com/..."
-              />
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={isTeamLoading}>
-                {isTeamLoading ? "Registering..." : "Register Team"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

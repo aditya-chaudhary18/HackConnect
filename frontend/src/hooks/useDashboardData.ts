@@ -16,7 +16,7 @@ async function fetchUserHackathons(userId: string) {
 }
 
 export function useDashboardData() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   // 1. Fetch All Hackathons (Cached for 5 mins)
   const allHackathonsQuery = useQuery({
@@ -36,7 +36,7 @@ export function useDashboardData() {
   return { 
     allHackathons: allHackathonsQuery.data?.documents || [],
     myHackathons: myHackathonsQuery.data?.hackathons || [],
-    isLoading: allHackathonsQuery.isLoading || (!!user && myHackathonsQuery.isLoading),
+    isLoading: isAuthLoading || allHackathonsQuery.isLoading || (!!user && myHackathonsQuery.isLoading),
     isError: allHackathonsQuery.isError
   };
 }
