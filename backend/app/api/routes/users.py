@@ -140,7 +140,20 @@ async def get_user_hackathons(user_id: str):
             db.list_documents,
             database_id=settings.APPWRITE_DATABASE_ID,
             collection_id=settings.COLLECTION_HACKATHONS,
-            queries=[Query.equal('$id', hackathon_ids)]
+            queries=[
+                Query.equal('$id', hackathon_ids),
+                Query.select([
+                    '$id', 
+                    'name', 
+                    'tagline', 
+                    'image_url', 
+                    'start_date', 
+                    'location', 
+                    'mode', 
+                    'prize_pool', 
+                    'status'
+                ])
+            ]
         )
         
         # Step 4: Combine results

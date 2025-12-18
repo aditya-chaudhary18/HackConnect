@@ -12,6 +12,8 @@ import { EditProfileDialog } from "@/components/features/EditProfileDialog";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@/types/user";
+import { useProfile } from "@/hooks/useProfile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /*
 const mockUser = {
@@ -62,97 +64,12 @@ const projects = [
 export default function Profile() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { user: authUser, logout } = useAuth();
+  const { user: authUser, logout, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   
-  const [viewedUser, setViewedUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [participatedHackathons, setParticipatedHackathons] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (id) {
-        setIsLoading(true);
-        try {
-          const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-          const response = await fetch(`${API_URL}/users/${id}`);
-          
-          if (!response.ok) {
-            throw new Error("Failed to fetch user");
-          }
-          
-          const data = await response.json();
-          
-          const mappedUser: User = {
-            id: data.id,
-            username: data.username,
-            email: data.email,
-            name: data.name,
-            role: data.role || "participant",
-            avatar: data.avatar_url,
-            bio: data.bio,
-            skills: data.skills || [],
-            techStack: data.tech_stack || [],
-            githubUrl: data.github_url,
-            portfolioUrl: data.portfolio_url,
-            xp: data.xp || 0,
-            level: Math.floor((data.xp || 0) / 1000) + 1,
-            badges: [],
-            hackathonsParticipated: data.hackathons_participated || 0,
-            hackathonsWon: data.hackathons_won || 0,
-            reputationScore: data.reputation_score || 0,
-            createdAt: data.created_at ? new Date(data.created_at) : new Date(),
-          };
-          
-          setViewedUser(mappedUser);
-        } catch (error) {
-          console.error("Error fetching user:", error);
-          toast({
-            title: "Error",
-            description: "Could not load user profile",
-            variant: "destructive",
-          });
-          navigate("/profile"); // Redirect to own profile on error
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setViewedUser(authUser);
-      }
-    };
-
-    const fetchHackathons = async () => {
-      const targetId = id || authUser?.id;
-      if (!targetId) return;
-
-      try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-        const response = await fetch(`${API_URL}/users/${targetId}/hackathons`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.hackathons) {
-            const mapped = data.hackathons.map((h: any) => ({
-              id: h.$id || h.id,
-              title: h.name,
-              shortDescription: h.tagline || h.description?.substring(0, 100) || "",
-              coverImage: h.image_url || "https://images.unsplash.com/photo-1504384308090-c54be3855463?q=80&w=1200&auto=format&fit=crop",
-              startDate: new Date(h.start_date),
-              location: { type: h.mode === 'online' ? 'online' : 'in-person', city: h.location },
-              totalPrizePool: parseInt(h.prize_pool) || 0,
-              currency: "USD",
-              status: h.status,
-            }));
-            setParticipatedHackathons(mapped);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch hackathons", error);
-      }
-    };
-
-    fetchUser();
-    fetchHackathons();
-  }, [id, authUser, navigate, toast]);
+  const { profileQuery, hackathonQuery } = useProfile(id, authUser?.id);
+  const viewedUser = profileQuery.data;
+  const participatedHackathons = hackathonQuery.data || [];
 
   const handleLogout = async () => {
     await logout();
@@ -179,11 +96,15 @@ export default function Profile() {
     }
   };
 
-  if (isLoading) {
-    return <div className="p-8 flex justify-center">Loading profile...</div>;
+  if (profileQuery.isLoading || (!id && authLoading)) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
   }
 
-  if (!viewedUser) return null;
+  if (profileQuery.isError || !viewedUser) return <div>User not found</div>;
 
   const isOwnProfile = !id || (authUser && authUser.id === viewedUser.id);
 
@@ -220,7 +141,7 @@ export default function Profile() {
             <TabsContent value="hackathons">
               <div className="grid md:grid-cols-2 gap-4">
                 {participatedHackathons.length > 0 ? (
-                  participatedHackathons.map((hackathon) => (
+                  participatedHackathons.map((hackathon: any) => (
                     <HackathonCard key={hackathon.id} hackathon={hackathon} variant="compact" />
                   ))
                 ) : (
