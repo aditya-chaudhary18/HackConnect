@@ -24,7 +24,7 @@ const mainNavItems = [
   { href: "/explore", icon: Compass, label: "Explore", roles: ["participant"] },
   { href: "/my-hackathons", icon: Calendar, label: "My Hackathons" },
   { href: "/teams/lobby", icon: Users, label: "Teams", roles: ["participant"] },
-  { href: "/chat", icon: MessageSquare, label: "Messages" },
+  // { href: "/chat", icon: MessageSquare, label: "Messages" },
   { href: "/showcase", icon: Trophy, label: "Showcase" },
 ];
 
@@ -145,7 +145,7 @@ export function Sidebar({ collapsed = false, setCollapsed }: SidebarProps) {
       </div>
 
       {/* XP Progress */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {!collapsed && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -168,7 +168,7 @@ export function Sidebar({ collapsed = false, setCollapsed }: SidebarProps) {
             <p className="text-xs text-muted-foreground mt-1 whitespace-nowrap">550 XP to Level 13</p>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </motion.aside>
   );
 }
