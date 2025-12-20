@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HackathonCard, HackathonCardSkeleton } from "@/components/features/HackathonCard";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import {
   Zap,
   Users,
@@ -22,53 +24,14 @@ import {
   X,
 } from "lucide-react";
 
-const featuredHackathons = [
-  {
-    id: "1",
-    title: "Web3 Global Summit 2024",
-    slug: "web3-global-summit-2024",
-    shortDescription: "Build the future of decentralized applications with $100K in prizes",
-    coverImage: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&q=80",
-    startDate: new Date("2024-03-15"),
-    location: { type: "hybrid" as const, city: "San Francisco", country: "USA" },
-    participantCount: 1247,
-    totalPrizePool: 100000,
-    currency: "USD",
-    tags: ["Web3", "Blockchain", "DeFi"],
-    status: "upcoming" as const,
-    difficulty: "intermediate" as const,
-  },
-  {
-    id: "2",
-    title: "AI Innovation Challenge",
-    slug: "ai-innovation-challenge",
-    shortDescription: "Push the boundaries of artificial intelligence and machine learning",
-    coverImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
-    startDate: new Date("2024-02-28"),
-    location: { type: "online" as const },
-    participantCount: 2891,
-    totalPrizePool: 75000,
-    currency: "USD",
-    tags: ["AI", "ML", "Python"],
-    status: "ongoing" as const,
-    difficulty: "advanced" as const,
-  },
-  {
-    id: "3",
-    title: "Green Tech Hackathon",
-    slug: "green-tech-hackathon",
-    shortDescription: "Create sustainable solutions for a better planet",
-    coverImage: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&q=80",
-    startDate: new Date("2024-04-01"),
-    location: { type: "in-person" as const, city: "Berlin", country: "Germany" },
-    participantCount: 583,
-    totalPrizePool: 50000,
-    currency: "EUR",
-    tags: ["CleanTech", "IoT", "Sustainability"],
-    status: "upcoming" as const,
-    difficulty: "beginner" as const,
-  },
-];
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+
+async function fetchFeaturedHackathons() {
+  const res = await fetch(`${API_URL}/hackathons`);
+  if (!res.ok) throw new Error("Failed to load hackathons");
+  const data = await res.json();
+  return data.documents || [];
+}
 
 const stats = [
   { value: "50K+", label: "Hackers", icon: Users },
@@ -101,8 +64,42 @@ const features = [
 ];
 
 export default function Index() {
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selectedHackathon = featuredHackathons.find((h) => h.id === selectedId);
+
+  // Redirect if logged in
+  useEffect(() => {
+    if (!isAuthLoading && user) {
+      navigate("/dashboard");
+    }
+  }, [user, isAuthLoading, navigate]);
+
+  // Fetch Hackathons
+  const { data: hackathons, isLoading: isHackathonsLoading } = useQuery({
+    queryKey: ["featured_hackathons"],
+    queryFn: fetchFeaturedHackathons,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Map backend data to frontend format
+  const featuredHackathons = (hackathons || []).slice(0, 3).map((h: any) => ({
+    id: h.$id || h.id,
+    title: h.name,
+    shortDescription: h.tagline || "",
+    coverImage: h.image_url,
+    startDate: new Date(h.start_date),
+    location: { type: h.mode === "online" ? "online" : "in-person", city: h.location },
+    totalPrizePool: parseInt(h.prize_pool) || 0,
+    currency: "USD",
+    status: h.status,
+    tags: h.tags || [],
+    participantCount: h.participants?.length || 0,
+  }));
+
+  const selectedHackathon = featuredHackathons.find((h: any) => h.id === selectedId);
+
+  if (isAuthLoading) return null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -199,22 +196,29 @@ export default function Index() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredHackathons.map((hackathon, index) => (
-              <motion.div
-                key={hackathon.id}
-                layoutId={hackathon.id}
-                className="h-full"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <HackathonCard
-                  hackathon={hackathon}
-                  variant={index === 0 ? "featured" : "default"}
-                  onClick={() => setSelectedId(hackathon.id)}
-                />
-              </motion.div>
-            ))}
+            {isHackathonsLoading ? (
+              // Loading Skeletons
+              Array.from({ length: 3 }).map((_, i) => (
+                <HackathonCardSkeleton key={i} />
+              ))
+            ) : (
+              featuredHackathons.map((hackathon: any, index: number) => (
+                <motion.div
+                  key={hackathon.id}
+                  layoutId={hackathon.id}
+                  className="h-full"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <HackathonCard
+                    hackathon={hackathon}
+                    variant={index === 0 ? "featured" : "default"}
+                    onClick={() => setSelectedId(hackathon.id)}
+                  />
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -292,7 +296,7 @@ export default function Index() {
                   </div>
 
                   <div className="flex gap-4 pt-4 border-t border-border">
-                    <Link to={`/register/${selectedHackathon.id}`} className="flex-1">
+                    <Link to={`/hackathons/${selectedHackathon.id}`} className="flex-1">
                       <Button size="lg" className="w-full font-semibold text-lg h-12" variant="neon">
                         Register Now
                         <ArrowRight className="ml-2 h-5 w-5" />
