@@ -9,6 +9,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
 import { HackathonCard } from "@/components/features/HackathonCard";
 import { useHackathons } from "@/hooks/useHackathons";
+import { PageHeaderSkeleton, HackathonCardsSkeleton } from "@/components/ui/page-skeleton";
 import {
   Search,
   Filter,
@@ -88,8 +89,24 @@ export default function Explore() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="p-8">
+        <PageHeaderSkeleton />
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1 h-10 bg-muted rounded-lg" />
+              <div className="flex gap-2">
+                <div className="h-10 w-32 bg-muted rounded-lg" />
+                <div className="h-10 w-32 bg-muted rounded-lg" />
+                <div className="h-10 w-32 bg-muted rounded-lg" />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-9 w-24 bg-muted rounded-lg" />)}
+            </div>
+          </div>
+          <HackathonCardsSkeleton count={6} />
+        </div>
       </div>
     );
   }

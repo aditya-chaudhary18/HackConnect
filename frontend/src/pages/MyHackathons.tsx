@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { HackathonCard } from "@/components/features/HackathonCard";
 import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, Calendar, Trophy } from "lucide-react";
+import { PageHeaderSkeleton, HackathonCardsSkeleton } from "@/components/ui/page-skeleton";
 
 export default function MyHackathons() {
   const { user } = useAuth();
@@ -49,8 +50,12 @@ export default function MyHackathons() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="p-8">
+        <div className="flex items-center gap-2 mb-8">
+          <div className="h-10 w-10 bg-muted rounded-lg" />
+          <PageHeaderSkeleton />
+        </div>
+        <HackathonCardsSkeleton count={6} />
       </div>
     );
   }

@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { User } from "@/types/user";
 import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProfileSkeleton } from "@/components/ui/page-skeleton";
 
 /*
 const mockUser = {
@@ -98,8 +99,8 @@ export default function Profile() {
 
   if (profileQuery.isLoading || (!id && authLoading)) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="p-8">
+        <ProfileSkeleton />
       </div>
     );
   }

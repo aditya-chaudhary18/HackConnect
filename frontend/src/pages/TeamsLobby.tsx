@@ -11,6 +11,7 @@ import { useTeams } from "@/hooks/useTeams";
 import { useToast } from "@/hooks/use-toast";
 import { Team } from "@/types/team";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeaderSkeleton, TeamCardsSkeleton } from "@/components/ui/page-skeleton";
 import {
   Search,
   Plus,
@@ -134,6 +135,21 @@ export default function TeamsLobby() {
       );
     return matchesSearch && matchesSkill;
   });
+
+  if (isLoading) {
+    return (
+      <div className="p-8">
+        <PageHeaderSkeleton />
+        <div className="space-y-6">
+          <div className="h-20 bg-muted rounded-lg" />
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-9 w-24 bg-muted rounded-lg" />)}
+          </div>
+          <TeamCardsSkeleton count={6} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, MapPin, Users, Trophy, Share2, Globe, Monitor, Clock, CheckCircle2, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
+import { DetailPageSkeleton } from "@/components/ui/page-skeleton";
 
 export default function HackathonDetails() {
   const { id } = useParams<{ id: string }>();
@@ -93,8 +94,8 @@ export default function HackathonDetails() {
 
   if (isHackathonLoading || !hackathon) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="p-8">
+        <DetailPageSkeleton />
       </div>
     );
   }

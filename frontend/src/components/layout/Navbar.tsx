@@ -8,6 +8,7 @@ import {
   X
 } from "lucide-react";
 import { useState } from "react";
+import { useIsFetching } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -17,6 +18,7 @@ export function Navbar() {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   const isAuthPage = location.pathname.includes('/login') || location.pathname.includes('/signup');
+  const isFetching = useIsFetching() > 0;
 
   const handleLogout = async () => {
     await logout();
@@ -24,14 +26,17 @@ export function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+    <nav className="relative fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2 group">
             <div className="relative">
               <img src="/logo.svg" alt="HackConnect Logo" className="h-8 w-8 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
-              <div className="absolute inset-0 blur-lg bg-primary/30 group-hover:bg-primary/50 transition-all duration-300" />
+              <div className={cn(
+                "absolute inset-0 blur-lg transition-all duration-300",
+                isFetching ? "bg-primary/50" : "bg-primary/30 group-hover:bg-primary/50"
+              )} />
             </div>
             <span className="text-xl font-bold tracking-tight">
               Hack<span className="text-primary">Connect</span>

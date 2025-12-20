@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Card as DetailCard, CardContent as DetailCardContent, CardHeader as DetailCardHeader } from "@/components/ui/card";
 
 export default function TeamDetails() {
   const { teamId } = useParams();
@@ -102,7 +103,29 @@ export default function TeamDetails() {
   };
 
   if (isLoading && !team) {
-    return <div className="p-8"><Skeleton className="h-96 w-full" /></div>;
+    return (
+      <div className="container mx-auto p-6 max-w-4xl space-y-8">
+        <Skeleton className="h-10 w-32 mb-4" />
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-12 w-64" />
+              <Skeleton className="h-6 w-96" />
+            </div>
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-32 rounded-lg" />
+              <Skeleton className="h-10 w-32 rounded-lg" />
+            </div>
+          </div>
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   if (!team) return null;
